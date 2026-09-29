@@ -1,0 +1,39 @@
+{
+  "name": "lotto-pattern-lab",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:patterns:live": "node tests/verifyLivePatterns.mjs",
+    "test:patterns:ui": "node tests/verifyPatternUI.mjs",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "test:generator:live": "node tests/verifyLiveGenerator.mjs",
+    "test:generator:ui": "node tests/verifyGeneratorUI.mjs",
+    "test:backtest:live": "node tests/verifyLiveBacktest.mjs",
+    "test:backtest:ui": "node tests/verifyBacktestUI.mjs",
+    "test:data:live": "node tests/verifyLiveData.mjs",
+    "test:analysis:live": "node tests/verifyLiveAnalysis.mjs",
+    "test:readiness:ui": "node tests/verifyReadinessUI.mjs",
+    "test:boundary:ui": "node tests/verifyErrorBoundaryUI.mjs"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "^1.81.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
