@@ -28,6 +28,7 @@ try {
         if (name !== 'Settings') await ready()
         if (name === 'Generator') {
           await page.getByRole('button', { name: 'GENERATE NUMBERS', exact: true }).click()
+          await page.waitForFunction(() => document.querySelector('.generator-page .generate-button')?.getAttribute('aria-busy') === 'false')
           await page.locator('.combination-card').first().locator('summary').click()
         }
         if (name === 'Backtest') {

@@ -31,4 +31,4 @@ export function generateCombinations(context: ReturnType<typeof prepareGenerator
   if (results.length !== count) throw new Error('Unique batch retry limit reached. Try generating again or select fewer combinations.')
   return results
 }
-export type GeneratedCombination = ReturnType<typeof generateCombinations>[number]
+export type GeneratedCombination = ReturnType<typeof generateCombinations>[number] & { selectionMethod?: 'highest-pattern-score' }

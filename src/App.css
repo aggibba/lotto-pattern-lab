@@ -161,3 +161,6 @@ footer { padding: 24px 0 28px; color: #96a5ba; font-size: 10px; line-height: 1.8
 .history-card { margin: 18px 0; padding: 16px 0; }
 .generator-controls button { padding: 10px; border: 1px solid #bdd0e8; border-radius: 6px; background: #eaf1fc; color: #244f86; cursor: pointer; }
 .notice { overflow-wrap: anywhere; }
+
+.generator-page .generate-button { background: #f4dfaa; }
+.generator-page .generate-button.generate-flash { background: #eaf1fc; }

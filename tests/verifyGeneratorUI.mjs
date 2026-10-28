@@ -15,7 +15,29 @@ try {
   await page.goto(process.env.APP_URL ?? 'http://127.0.0.1:5173')
   await page.getByRole('button', { name: 'Generate Numbers', exact: true }).click()
   await page.getByRole('button', { name: 'GENERATE NUMBERS', exact: true }).waitFor()
-  for (const width of [390, 320]) {
+  await page.waitForFunction(() => !document.querySelector('.generator-page .generate-button')?.disabled)
+  assert.equal(await page.locator('.generator-page .generate-button').evaluate(b => getComputedStyle(b).backgroundColor), 'rgb(244, 223, 170)')
+  await page.evaluate(() => {
+    const button = document.querySelector('.generator-page .generate-button')
+    window.flashSamples = []
+    window.searchTicks = 0
+    window.searchTimer = setInterval(() => window.searchTicks++, 10)
+    window.flashObserver = new MutationObserver(() => window.flashSamples.push({ time: performance.now(), flashing: button.classList.contains('generate-flash'), color: getComputedStyle(button).backgroundColor }))
+    window.flashObserver.observe(button, { attributes: true, attributeFilter: ['class'] })
+  })
+  await page.getByRole('button', { name: 'GENERATE NUMBERS', exact: true }).focus()
+  await page.keyboard.press('Enter')
+  await page.waitForFunction(() => document.querySelector('.generator-page .generate-button')?.getAttribute('aria-busy') === 'false' && !document.querySelector('.generate-flash'))
+  const flash = await page.evaluate(() => { clearInterval(window.searchTimer); window.flashObserver.disconnect(); return { samples: window.flashSamples, ticks: window.searchTicks } })
+  assert.equal(flash.samples[0].color, 'rgb(234, 241, 252)')
+  assert.equal(flash.samples.at(-1).color, 'rgb(244, 223, 170)')
+  assert.ok(flash.samples.at(-1).time - flash.samples[0].time >= 150 && flash.samples.at(-1).time - flash.samples[0].time < 600)
+  assert.ok(flash.ticks > 2, 'Event loop remains responsive during search')
+  await page.getByRole('button', { name: 'GENERATE NUMBERS', exact: true }).click()
+  await page.getByLabel('Analysis Period', { exact: true }).selectOption('50')
+  await page.waitForTimeout(300)
+  assert.equal(await page.locator('.combination-card').count(), 0, 'Cancelled period search cannot restore stale results')
+  for (const width of [768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 })
     for (const lottery of Object.values(lotteries)) {
       await page.locator('.generator-controls').getByLabel('Lottery', { exact: true }).selectOption(lottery.id)
@@ -27,7 +49,11 @@ try {
           await page.getByLabel('Generation Strategy').selectOption(strategy)
           await page.getByLabel('Number of combinations').selectOption('5')
           await page.getByRole('button', { name: 'GENERATE NUMBERS', exact: true }).click()
+          await page.waitForFunction(() => document.querySelector('.generator-page .generate-button')?.getAttribute('aria-busy') === 'false')
           assert.equal(await page.locator('.combination-card').count(), 5)
+          assert.equal(await page.locator('.combination-card h3').first().textContent(), 'Highest Pattern Score')
+          const batchScores = (await page.locator('.combination-card h4').allTextContents()).map(t => Number(t.match(/Score: ([0-9.]+)/)[1]))
+          assert.equal(batchScores[0], Math.max(...batchScores))
           const card = page.locator('.combination-card').first()
           await card.getByText('Score Details', { exact: true }).click()
           const main = (await card.locator('.ball-row .lottery-ball').allTextContents()).map(Number)
@@ -38,6 +64,7 @@ try {
           await card.getByRole('button', { name: 'Save Combination', exact: true }).click()
           assert.equal(await page.locator('.saved-card').count(), 1)
           await card.getByRole('button', { name: 'Generate Again', exact: true }).click()
+          await page.waitForFunction(() => document.querySelector('.generator-page .generate-button')?.getAttribute('aria-busy') === 'false')
           const keys = await page.locator('.combination-card').evaluateAll(cards => cards.map(c => c.querySelector('.ball-row').textContent + '|' + c.querySelector('.special-line').textContent))
           assert.equal(new Set(keys).size, 5)
           assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `overflow ${width}/${lottery.id}/${period}/${strategy}`)
@@ -54,6 +81,7 @@ try {
   const requestsBefore = requests.length
   await page.locator('.generator-controls').getByLabel('Lottery', { exact: true }).selectOption('powerball')
   await page.getByRole('button', { name: 'GENERATE NUMBERS', exact: true }).click()
+          await page.waitForFunction(() => document.querySelector('.generator-page .generate-button')?.getAttribute('aria-busy') === 'false')
   await page.locator('.combination-card').first().getByRole('button', { name: 'Save Combination', exact: true }).click()
   assert.equal(requests.length, requestsBefore, 'Switching back to a loaded lottery must not refetch')
   await page.reload()
