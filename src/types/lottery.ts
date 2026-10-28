@@ -38,6 +38,7 @@ export interface Drawing {
   ruleVerification: 'verified' | 'unverified'
 }
 export interface LotteryDataset {
+  cacheNotice?: string
   lotteryId: LotteryId
   drawings: readonly Drawing[] // Ascending official drawing date.
   source: DataSource

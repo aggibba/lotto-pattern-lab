@@ -18,7 +18,8 @@
     "test:data:live": "node tests/verifyLiveData.mjs",
     "test:analysis:live": "node tests/verifyLiveAnalysis.mjs",
     "test:readiness:ui": "node tests/verifyReadinessUI.mjs",
-    "test:boundary:ui": "node tests/verifyErrorBoundaryUI.mjs"
+    "test:boundary:ui": "node tests/verifyErrorBoundaryUI.mjs",
+    "test:pwa:ui": "node tests/verifyPwaUI.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -31,7 +32,8 @@
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
     "typescript": "~6.0.2",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "vite-plugin-pwa": "^2.0.0"
   },
   "engines": {
     "node": ">=24"

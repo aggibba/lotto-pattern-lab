@@ -19,7 +19,7 @@ try {
   assert.equal(await page.locator(':focus').getAttribute('id'), 'dashboard')
   assert.equal(await page.title(), 'Lotto Pattern Lab')
   assert.equal((await page.request.get(new URL('/favicon.svg', page.url()).href)).status(), 200)
-  for (const width of [320, 390, 768]) {
+  for (const width of [320, 390, 430, 768]) {
     await page.setViewportSize({ width, height: 900 })
     for (const lottery of ['powerball', 'mega-millions']) {
       await page.locator('#lottery').selectOption(lottery)
@@ -38,6 +38,7 @@ try {
           await page.locator('.backtest-combination').first().waitFor()
         }
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${name}/${lottery}/${width} overflow`)
+        assert.deepEqual(await page.locator('button, select, input, summary').evaluateAll(elements => elements.filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.width < 43.5 || r.height < 43.5) }).map(el => el.textContent?.slice(0, 50))), [], 'Touch targets are at least 44px')
         await page.screenshot({ path: `artifacts/readiness-${lottery}-${name.replaceAll(' ', '-')}-${width}.png`, fullPage: true })
         report.push({ width, lottery, page: name, overflow: false })
       }
@@ -55,10 +56,10 @@ try {
   assert.ok(requests > before, 'Refresh must reload source')
   await page.route('https://data.ny.gov/**', route => route.fulfill({ status: 503, body: 'Unavailable' }))
   await page.getByRole('button', { name: 'Refresh Data', exact: true }).click()
-  await page.getByRole('alert').filter({ hasText: 'HTTP 503' }).waitFor()
-  assert.equal(await page.locator('.history-card tbody tr').count(), 0)
+  await page.getByRole('alert').filter({ hasText: 'previously saved archive' }).waitFor()
+  assert.equal(await page.locator('.history-card tbody tr').count(), 25)
   await page.unroute('https://data.ny.gov/**')
-  await page.getByRole('button', { name: 'Retry loading' }).click(); await ready()
+  await page.getByRole('button', { name: 'Refresh Data', exact: true }).click(); await ready()
   await page.getByRole('button', { name: 'Settings', exact: true }).click()
   await page.getByLabel('Default Lottery', { exact: true }).selectOption('mega-millions')
   await page.getByLabel('Default Analysis Period').selectOption('50')

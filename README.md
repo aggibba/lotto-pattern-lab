@@ -119,7 +119,8 @@ Recommended Vercel settings:
 
 Navigation uses React state, not URL paths. Refreshing `/` safely returns to
 Dashboard with saved defaults. Section anchors do not require server rewrites.
-No routing dependency or `vercel.json` is needed for the current implementation.
+No routing dependency or SPA rewrite is needed. `vercel.json` sets revalidation
+headers for the service worker and manifest.
 If path-based routes are introduced later, configure SPA rewrites as documented
 in [Vercel's Vite guide](https://vercel.com/docs/frameworks/frontend/vite).
 
@@ -137,3 +138,35 @@ for statistical exploration and entertainment.
 
 See [Step 5](artifacts/step-5-report.md), [Step 6](artifacts/step-6-report.md) and
 [Step 7](artifacts/step-7-report.md) reports for implementation and verification details.
+
+## Mobile and PWA
+
+Mobile navigation is fixed to the bottom with safe-area padding. Touch controls
+are at least 44px high; desktop navigation is unchanged. The existing Generator
+button colors, scoring/search logic and lottery rules are unchanged.
+
+The production build uses vite-plugin-pwa with a standalone manifest, 192/512px
+icons, a maskable icon and an Apple touch icon derived from the existing mark.
+Install help is opt-in: supported Android browsers expose Install app; iOS users
+use Safari > Share > Add to Home Screen. Installed standalone views hide help.
+
+The service worker precaches only the app shell/static assets, never NY API pages.
+The existing one-hour memory cache remains. Complete validated archives are also
+saved in Cache Storage, revalidated on read, and used if a fresh load fails. Saved
+archive fallback is prominently labeled, preserving original Data Through and
+Retrieved dates. With no saved archive, offline data remains unavailable. Browser
+storage can be evicted; offline availability requires an earlier successful visit.
+localStorage combinations/settings remain untouched by service-worker updates.
+
+Updates are checked on load and when returning to the app. A waiting worker offers
+Update and reload or Later, avoiding unexpected interruption. Old shell caches
+are cleaned on activation. No data polling or backend is added. HTTPS is required
+(except localhost). Vercel serves the generated dist directory without special
+routing; no deployment is performed by these scripts.
+
+To verify actual service-worker behavior, build and start `npm run preview --
+--host 127.0.0.1 --port 4180`, then run `npm run test:pwa:ui` with Playwright/Edge
+available. This check temporarily modifies and restores only generated dist/sw.js
+to verify an update. Use APP_URL to target another local preview port. The readiness
+UI suite covers 320, 390, 430 and 768px. OS install dialogs are device/browser
+controlled; browser tests simulate install events and iOS detection.

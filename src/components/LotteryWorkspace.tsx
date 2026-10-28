@@ -32,6 +32,7 @@ export function LotteryWorkspace({ lottery, page, onGenerate, onLotteryChange, d
         {dataset?.warnings.map((warning) => <p key={warning}>{warning}</p>)}
       </div>
     </div>
+    {dataset?.cacheNotice && <div className="notice" role="alert">{dataset.cacheNotice}</div>}
     <div className="source-details">
       <p><strong>Source:</strong> <a href={lottery.source.url} target="_blank" rel="noreferrer">New York State Gaming Commission / NY Open Data</a></p>
       <p><strong>Data Through:</strong> {dataset?.dataThrough ?? 'Unavailable'}</p>

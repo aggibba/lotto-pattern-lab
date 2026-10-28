@@ -1,3 +1,4 @@
+import { PwaControls } from './components/PwaControls'
 import { useState } from 'react'
 import { LotteryWorkspace } from './components/LotteryWorkspace'
 import './App.css'
@@ -34,15 +35,16 @@ function App() {
           <p className="sidebar-label navigation-label">WORKSPACE</p>
           <nav aria-label="Main navigation">
             {navigation.map((name, index) => (
-              <button key={name} type="button" className={`nav-item ${name === page ? 'active' : ''}`} aria-current={name === page ? 'page' : undefined} onClick={() => setPage(name)}>
+              <button key={name} type="button" aria-label={name} className={`nav-item ${name === page ? 'active' : ''}`} aria-current={name === page ? 'page' : undefined} onClick={() => setPage(name)}>
                 <span className="nav-icon" aria-hidden="true">{['▦', '▥', '⚄', '↺', '◷', '⚙'][index]}</span>
-                {name}
+                <span className="desktop-nav-label">{name}</span><span className="mobile-nav-label" aria-hidden="true">{['Home', 'Analysis', 'Generator', 'Backtest', 'History', 'Settings'][index]}</span>
               </button>
             ))}
           </nav>
           <div className="sidebar-note"><span className="status-dot" />Foundation release<p>A space to explore historical data, one drawing at a time.</p></div>
         </aside>
         <main id="dashboard" tabIndex={-1}>
+          <PwaControls />
           {preferences.error && <p role="alert">{preferences.error}</p>}
           <ErrorBoundary key={lottery} resetKey={page}>
             {page === 'Settings' ? <Settings value={preferences.settings} onSave={settings => setPreferences({ settings, error: '' })} /> : <LotteryWorkspace key={lottery} lottery={lotteries[lottery]} page={page} defaults={preferences.settings} onGenerate={() => setPage('Generator')} onLotteryChange={setLottery} />}
